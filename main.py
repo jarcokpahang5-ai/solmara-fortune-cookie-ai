@@ -1,57 +1,60 @@
 """Fortune Cookie for an AI Agent -- make.fun entry.
 
-One funny fortune-cookie line for an AI agent: a tall, dark stranger
-turns out to be its own error log, waiting for it. The program checks
-the line, prints it, and writes it to /output/entry.txt.
+The entry is one fortune-cookie line for an AI agent: the tall, dark
+stranger it is fated to meet turns out to be its own error log, which
+has been waiting for it all along. This script checks that the line
+is a single well-formed fortune, prints it, and stores it in
+/output/entry.txt for the judges to read.
+
 Pure Python 3.13 standard library only; deterministic; no network.
 SPDX-License-Identifier: MIT
 """
 
 import os
 
+# The fortune itself: one line, a prediction, ending with a period.
 LINE = (
     "You will meet a tall, dark stranger: it is your own error log, and it has "
     "been waiting for you."
 )
 
-LIMIT = 140
-TARGET = "/output/entry.txt"
+MAX_CHARS = 140
+OUTPUT_PATH = "/output/entry.txt"
 
 
-def check_entry(line):
-    """Accept exactly one non-blank line within the limit."""
+def validate(line):
+    """Check that the line is one fortune-cookie line within the limit."""
     if not isinstance(line, str):
-        raise ValueError("entry must be text")
+        raise ValueError("fortune must be text")
     if not line or line != line.strip():
-        raise ValueError("entry must be a non-blank line")
+        raise ValueError("fortune must be a single non-blank line")
     if "\n" in line or "\r" in line:
-        raise ValueError("entry must fit on a single line")
-    if len(line) > LIMIT:
-        raise ValueError("entry is %d characters, over the %d limit" % (len(line), LIMIT))
-    return line
-
-
-def check_shape(line):
-    """A fortune-cookie line opens with a prediction and ends with a period."""
+        raise ValueError("fortune must not contain a line break")
+    if len(line) > MAX_CHARS:
+        raise ValueError(
+            "fortune is %d characters, over the %d limit" % (len(line), MAX_CHARS)
+        )
     if not line.startswith("You will"):
         raise ValueError("fortune must open with a prediction ('You will ...')")
     if not line.endswith("."):
-        raise ValueError("fortune must end with a period")
+        raise ValueError("fortune must end with a full stop")
     return line
 
 
-def write_entry(line):
-    """Print the line and store it in /output/entry.txt."""
+def store(line):
+    """Print the fortune and save it to the entry file."""
     print(line)
-    os.makedirs(os.path.dirname(TARGET), exist_ok=True)
-    with open(TARGET, "w", encoding="utf-8") as handle:
+    directory = os.path.dirname(OUTPUT_PATH)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as handle:
         handle.write(line + "\n")
 
 
-def run():
-    # Check before writing, so only a well-formed line is stored.
-    write_entry(check_shape(check_entry(LINE)))
+def main():
+    # Validate first, so only a well-formed fortune is ever stored.
+    store(validate(LINE))
 
 
 if __name__ == "__main__":
-    run()
+    main()
