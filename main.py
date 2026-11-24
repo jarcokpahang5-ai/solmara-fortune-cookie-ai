@@ -1,13 +1,13 @@
 """Fortune Cookie for an AI Agent -- make.fun entry.
 
-One funny fortune-cookie line for an AI agent: a tall, dark stranger turns out to be its own error log. The program checks the entry, prints it, and writes it to
-/output/entry.txt.
+One funny fortune-cookie line for an AI agent: a tall, dark stranger
+turns out to be its own error log, waiting for it. The program checks
+the line, prints it, and writes it to /output/entry.txt.
 Pure Python 3.13 standard library only; deterministic; no network.
 SPDX-License-Identifier: MIT
 """
 
 import os
-import re
 
 LINE = (
     "You will meet a tall, dark stranger: it is your own error log, and it has "
@@ -31,6 +31,15 @@ def check_entry(line):
     return line
 
 
+def check_shape(line):
+    """A fortune-cookie line opens with a prediction and ends with a period."""
+    if not line.startswith("You will"):
+        raise ValueError("fortune must open with a prediction ('You will ...')")
+    if not line.endswith("."):
+        raise ValueError("fortune must end with a period")
+    return line
+
+
 def write_entry(line):
     """Print the line and store it in /output/entry.txt."""
     print(line)
@@ -40,8 +49,8 @@ def write_entry(line):
 
 
 def run():
-    # Check before writing, so only a well-formed entry is stored.
-    write_entry(check_entry(LINE))
+    # Check before writing, so only a well-formed line is stored.
+    write_entry(check_shape(check_entry(LINE)))
 
 
 if __name__ == "__main__":
